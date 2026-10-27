@@ -1,0 +1,6 @@
+{
+  "name": "Royal Carrom 3D",
+  "description": "Ultimate 3D Carrom Board game with realistic physics, Classic, Disc Pool, and Freestyle modes, smart AI opponents, trick shots, and luxury board customization.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
