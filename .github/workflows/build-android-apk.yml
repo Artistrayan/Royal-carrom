@@ -2,7 +2,8 @@ name: Build Android APK
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -23,18 +24,22 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: "21"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '9.3.1'
+          gradle-version: "9.3.1"
 
       - name: Accept Android SDK licenses
-        run: yes | "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" --licenses || true
+        shell: bash
+        run: |
+          yes | sdkmanager --licenses || true
 
       - name: Install Android SDK platform and build tools
-        run: "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" --install "platforms;android-36.1" "build-tools;36.0.0" "platform-tools"
+        shell: bash
+        run: |
+          sdkmanager --install "platforms;android-36.1" "build-tools;36.0.0" "platform-tools"
 
       - name: Build debug APK
         run: gradle --no-daemon assembleDebug
