@@ -167,33 +167,45 @@ class CarromGameViewModel : ViewModel() {
     }
 
     fun buyStrikerSkin(skin: StrikerSkin) {
-        if (_uiState.value.profile.coins >= skin.price) {
-            val updatedSkins = _uiState.value.strikerSkins.map {
-                if (it.id == skin.id) it.copy(isUnlocked = true) else it
+        val current = _uiState.value
+        val existing = current.strikerSkins.firstOrNull { it.id == skin.id } ?: return
+        if (existing.isUnlocked) {
+            equipStriker(existing)
+            return
+        }
+        if (current.profile.coins >= existing.price) {
+            val updatedSkins = current.strikerSkins.map {
+                if (it.id == existing.id) it.copy(isUnlocked = true) else it
             }
             _uiState.update {
                 it.copy(
                     strikerSkins = updatedSkins,
-                    profile = it.profile.copy(coins = it.profile.coins - skin.price)
+                    profile = it.profile.copy(coins = it.profile.coins - existing.price)
                 )
             }
-            equipStriker(skin.copy(isUnlocked = true))
+            equipStriker(existing.copy(isUnlocked = true))
             CarromSoundEngine.playWinFanfare()
         }
     }
 
     fun buyBoardSkin(skin: BoardSkin) {
-        if (_uiState.value.profile.coins >= skin.price) {
-            val updatedSkins = _uiState.value.boardSkins.map {
-                if (it.id == skin.id) it.copy(isUnlocked = true) else it
+        val current = _uiState.value
+        val existing = current.boardSkins.firstOrNull { it.id == skin.id } ?: return
+        if (existing.isUnlocked) {
+            equipBoard(existing)
+            return
+        }
+        if (current.profile.coins >= existing.price) {
+            val updatedSkins = current.boardSkins.map {
+                if (it.id == existing.id) it.copy(isUnlocked = true) else it
             }
             _uiState.update {
                 it.copy(
                     boardSkins = updatedSkins,
-                    profile = it.profile.copy(coins = it.profile.coins - skin.price)
+                    profile = it.profile.copy(coins = it.profile.coins - existing.price)
                 )
             }
-            equipBoard(skin.copy(isUnlocked = true))
+            equipBoard(existing.copy(isUnlocked = true))
             CarromSoundEngine.playWinFanfare()
         }
     }
