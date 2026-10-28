@@ -403,8 +403,9 @@ class CarromGameViewModel : ViewModel() {
         // - Low power (0.12 - 0.3): Gentle, precise 28 - 45 units/frame for delicate pocket taps and positional play
         // - Mid power (0.4 - 0.7): Crisp, authoritative 60 - 110 units/frame for standard direct shots & cuts
         // - High / Max power (0.8 - 1.0): High-speed explosive 130 - 180 units/frame for powerful breaks & double-bank shots
-        val baseSpeed = 20f
-        val speed = baseSpeed + (power * 38f) + (power * power * 122f)
+        // Calibrated to the 1000-unit board: lower peak speed and smoother, controllable shots.
+        val baseSpeed = 5f
+        val speed = baseSpeed + (power * 20f) + (power * power * 55f)
 
         CarromSoundEngine.playStrikerHit(power)
 
