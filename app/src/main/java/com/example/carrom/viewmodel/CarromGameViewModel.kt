@@ -20,6 +20,7 @@ import com.example.carrom.model.TurnPlayer
 import com.example.carrom.physics.AimPrediction
 import com.example.carrom.physics.CarromPhysics
 import com.example.carrom.physics.ImpactEffect
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -244,7 +245,7 @@ class CarromGameViewModel : ViewModel() {
             x = scenario.strikerStartX,
             y = scenario.strikerStartY,
             radius = 33f,
-            mass = 2.2f
+            mass = 2.6f
         )
         piecesList.add(striker)
 
@@ -386,9 +387,12 @@ class CarromGameViewModel : ViewModel() {
 
         val power = _uiState.value.shotPower
         val angle = _uiState.value.aimAngleRad
-        // Striker max velocity calibrated for snappy real-time speed
-        val maxSpeed = 58f
-        val speed = power * maxSpeed
+        // Realistic tournament power-to-velocity kinetic mapping:
+        // - Low power (0.12 - 0.3): Gentle, precise 28 - 45 units/frame for delicate pocket taps and positional play
+        // - Mid power (0.4 - 0.7): Crisp, authoritative 60 - 110 units/frame for standard direct shots & cuts
+        // - High / Max power (0.8 - 1.0): High-speed explosive 130 - 180 units/frame for powerful breaks & double-bank shots
+        val baseSpeed = 20f
+        val speed = baseSpeed + (power * 38f) + (power * power * 122f)
 
         CarromSoundEngine.playStrikerHit(power)
 
@@ -423,14 +427,14 @@ class CarromGameViewModel : ViewModel() {
         val pocketedThisShot = mutableListOf<CarromPiece>()
         val activeImpacts = mutableListOf<ImpactEffect>()
 
-        physicsLoopJob = viewModelScope.launch {
+        physicsLoopJob = viewModelScope.launch(Dispatchers.Default) {
             var anyStillMoving = true
             var frameCount = 0
 
             // Work with a mutable list of deep-copied pieces
             val simPieces = _uiState.value.pieces.map { it.deepCopy() }.toMutableList()
 
-            while (anyStillMoving && frameCount < 360) {
+            while (anyStillMoving && frameCount < 480) {
                 frameCount++
                 delay(16) // 60 FPS update interval
 

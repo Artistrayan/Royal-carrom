@@ -20,8 +20,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Home
@@ -186,11 +184,10 @@ fun GameScreen(
                 )
             }
 
-            // Bottom Section: Luxury Tournament Striker Rail Controller
+            // Bottom Section: Striker Rail (pure bar, no text, no arrows)
             StrikerRailBar(
                 strikerX = strikerBaselineX,
                 isAiming = isAiming,
-                matchStatus = matchStatus,
                 onPositionChange = onStrikerSliderChange
             )
         }
@@ -584,154 +581,38 @@ private fun GameOverDialog(
 private fun StrikerRailBar(
     strikerX: Float,
     isAiming: Boolean,
-    matchStatus: MatchStatus,
     onPositionChange: (Float) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val minX = CarromPhysics.BASELINE_MIN_X
     val maxX = CarromPhysics.BASELINE_MAX_X
     val fraction = ((strikerX - minX) / (maxX - minX)).coerceIn(0f, 1f)
-    val percentage = (fraction * 100).toInt()
 
-    Card(
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 4.dp, vertical = 2.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = VelvetCard),
-        border = CardDefaults.outlinedCardBorder().copy(
-            brush = Brush.horizontalGradient(
-                listOf(
-                    GoldDark.copy(alpha = 0.35f),
-                    if (isAiming) GoldPrimary.copy(alpha = 0.85f) else GoldDark.copy(alpha = 0.3f),
-                    GoldDark.copy(alpha = 0.35f)
-                )
-            )
-        )
+            .padding(horizontal = 24.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Column(
+        Slider(
+            value = fraction,
+            onValueChange = { newFraction ->
+                val newX = minX + newFraction * (maxX - minX)
+                onPositionChange(newX)
+            },
+            enabled = isAiming,
+            colors = SliderDefaults.colors(
+                thumbColor = GoldPrimary,
+                activeTrackColor = GoldPrimary,
+                inactiveTrackColor = VelvetCardLight,
+                disabledThumbColor = Color.DarkGray,
+                disabledActiveTrackColor = Color.DarkGray,
+                disabledInactiveTrackColor = VelvetDark
+            ),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 6.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Header Row: Rail Title, Status & Position %
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(CircleShape)
-                            .background(if (isAiming) EmeraldSuccess else Color.Gray)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "ریل حرکت استرایکر (چپ / راست)",
-                        color = GoldLight,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                Text(
-                    text = if (isAiming) "موقعیت: $percentage٪" else if (matchStatus == MatchStatus.SIMULATING) "در حال حرکت..." else "نوبت حریف",
-                    color = if (isAiming) GoldPrimary else Color.Gray,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Spacer(modifier = Modifier.height(2.dp))
-
-            // The Interactive Luxury Rail Track with Nudge Buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // Left Nudge Button
-                IconButton(
-                    onClick = {
-                        val newX = (strikerX - 22f).coerceIn(minX, maxX)
-                        onPositionChange(newX)
-                    },
-                    enabled = isAiming,
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(VelvetCardLight)
-                        .border(1.dp, if (isAiming) GoldDark.copy(alpha = 0.6f) else Color.Transparent, CircleShape)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ChevronLeft,
-                        contentDescription = "حرکت استرایکر به چپ",
-                        tint = if (isAiming) GoldLight else Color.DarkGray,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-
-                // Smooth Sliding Rail Track
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(36.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Slider(
-                        value = fraction,
-                        onValueChange = { newFraction ->
-                            val newX = minX + newFraction * (maxX - minX)
-                            onPositionChange(newX)
-                        },
-                        enabled = isAiming,
-                        colors = SliderDefaults.colors(
-                            thumbColor = GoldPrimary,
-                            activeTrackColor = GoldPrimary,
-                            inactiveTrackColor = VelvetDark,
-                            disabledThumbColor = Color.DarkGray,
-                            disabledActiveTrackColor = Color.DarkGray,
-                            disabledInactiveTrackColor = VelvetDark
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-
-                // Right Nudge Button
-                IconButton(
-                    onClick = {
-                        val newX = (strikerX + 22f).coerceIn(minX, maxX)
-                        onPositionChange(newX)
-                    },
-                    enabled = isAiming,
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(VelvetCardLight)
-                        .border(1.dp, if (isAiming) GoldDark.copy(alpha = 0.6f) else Color.Transparent, CircleShape)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ChevronRight,
-                        contentDescription = "حرکت استرایکر به راست",
-                        tint = if (isAiming) GoldLight else Color.DarkGray,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-            }
-
-            // Quick instruction for shot execution
-            if (isAiming) {
-                Text(
-                    text = "روی ریل بکشید برای تنظیم مکان • برای شلیک استرایکر را به عقب بکشید و رها کنید",
-                    color = Color.White.copy(alpha = 0.8f),
-                    fontSize = 10.sp,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
+                .testTag("striker_rail_slider")
+        )
     }
 }
 

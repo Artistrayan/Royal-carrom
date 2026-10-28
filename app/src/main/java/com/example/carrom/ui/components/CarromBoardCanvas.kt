@@ -101,7 +101,7 @@ fun CarromBoardCanvas(
                                     isPullingSlingshot = true
                                     // Slingshot aim: shot flies in opposite direction of pull
                                     val angle = atan2(-pullDy.toDouble(), -pullDx.toDouble()).toFloat()
-                                    val power = (pullDist / 175f).coerceIn(0.15f, 1.0f)
+                                    val power = (pullDist / 160f).coerceIn(0.12f, 1.0f)
                                     onAimAndPowerChange(angle, power)
                                 } else if (!isPullingSlingshot) {
                                     // User is dragging left/right along the baseline to reposition striker
@@ -117,7 +117,7 @@ fun CarromBoardCanvas(
                                     val pullDx = (currentTouchOffset.x / scale) - striker.x
                                     val pullDy = (currentTouchOffset.y / scale) - striker.y
                                     val pullDist = sqrt((pullDx * pullDx + pullDy * pullDy).toDouble()).toFloat()
-                                    if (pullDist > 28f && aimPower >= 0.15f) {
+                                    if (pullDist > 20f && aimPower >= 0.12f) {
                                         onReleaseStrike()
                                     }
                                 }
@@ -750,38 +750,16 @@ private fun DrawScope.drawStrikerRail(
         )
     }
 
-    // 4. Rail end stops with luminous left/right arrows
-    val arrowSize = 6f * scale
-    // Left arrow <
-    drawLine(
-        color = Color(0xFFFFD54F),
-        start = Offset(minX - 3f * scale, railY - arrowSize),
-        end = Offset(minX - 8f * scale, railY),
-        strokeWidth = 2.4f * scale,
-        cap = StrokeCap.Round
+    // 4. Rail end stops (clean metallic rivets, no arrows)
+    drawCircle(
+        color = if (isAiming) Color(0xFFFFD54F) else Color(0xFF8D6E63),
+        radius = 3.5f * scale,
+        center = Offset(minX - 5f * scale, railY)
     )
-    drawLine(
-        color = Color(0xFFFFD54F),
-        start = Offset(minX - 8f * scale, railY),
-        end = Offset(minX - 3f * scale, railY + arrowSize),
-        strokeWidth = 2.4f * scale,
-        cap = StrokeCap.Round
-    )
-
-    // Right arrow >
-    drawLine(
-        color = Color(0xFFFFD54F),
-        start = Offset(maxX + 3f * scale, railY - arrowSize),
-        end = Offset(maxX + 8f * scale, railY),
-        strokeWidth = 2.4f * scale,
-        cap = StrokeCap.Round
-    )
-    drawLine(
-        color = Color(0xFFFFD54F),
-        start = Offset(maxX + 8f * scale, railY),
-        end = Offset(maxX + 3f * scale, railY + arrowSize),
-        strokeWidth = 2.4f * scale,
-        cap = StrokeCap.Round
+    drawCircle(
+        color = if (isAiming) Color(0xFFFFD54F) else Color(0xFF8D6E63),
+        radius = 3.5f * scale,
+        center = Offset(maxX + 5f * scale, railY)
     )
 
     // 5. Luminous slider carriage under the striker

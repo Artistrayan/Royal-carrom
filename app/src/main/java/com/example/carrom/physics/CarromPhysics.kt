@@ -49,14 +49,14 @@ object CarromPhysics {
         Pocket(905f, 905f)
     )
 
-    // Calibrated tournament physics: snappy wooden impacts, natural deceleration, zero pinballing
-    private const val RESTITUTION_COIN = 0.82f // Snappy, crisp disc-to-disc elasticity
-    private const val RESTITUTION_RAIL = 0.72f // Solid hard-timber cushion bounce
-    private const val FRICTION_MULT = 0.976f    // Smooth boric powder glide
-    private const val KINETIC_DECEL = 0.30f     // Linear Coulomb sliding friction
-    private const val STOP_THRESHOLD = 0.25f    // Smooth zero-velocity resting threshold
-    private const val ANGULAR_DECAY = 0.965f    // Rotational spin decay on wooden surface
-    private const val TANGENTIAL_FRICTION = 0.16f // Coulomb friction between colliding disc rims
+    // Calibrated tournament physics: snappy wooden impacts, natural boric powder glide, authentic velocity transfer
+    private const val RESTITUTION_COIN = 0.90f // Crisp, snappy disc-to-disc elasticity
+    private const val RESTITUTION_RAIL = 0.80f // Solid timber cushion bounce
+    private const val FRICTION_MULT = 0.988f    // Smooth boric powder glide
+    private const val KINETIC_DECEL = 0.12f     // Linear Coulomb sliding friction
+    private const val STOP_THRESHOLD = 0.15f    // Smooth zero-velocity resting threshold
+    private const val ANGULAR_DECAY = 0.980f    // Rotational spin decay on wooden surface
+    private const val TANGENTIAL_FRICTION = 0.10f // Coulomb friction between colliding disc rims
 
     /**
      * Executes one frame of simulation, split into sub-steps for smooth 60fps dynamics
@@ -66,7 +66,7 @@ object CarromPhysics {
         onPocketed: (CarromPiece, Pocket) -> Unit,
         onCollisionSound: (Float) -> Unit,
         onImpactEffect: (Float, Float, Float) -> Unit = { _, _, _ -> },
-        subSteps: Int = 12
+        subSteps: Int = 16
     ): Boolean {
         var anyMoved = false
         val activePieces = pieces.filter { !it.isPocketed }
@@ -410,7 +410,7 @@ object CarromPhysics {
             )
         }
 
-        // Striker with calibrated tournament mass ratio ~2.2x of coin mass
+        // Striker with calibrated tournament mass ratio ~2.6x of coin mass (official: 15g striker vs 5.5g coins)
         list.add(
             CarromPiece(
                 id = 999,
@@ -418,7 +418,7 @@ object CarromPhysics {
                 x = 500f,
                 y = BASELINE_P1_Y,
                 radius = 33f,
-                mass = 2.2f
+                mass = 2.6f
             )
         )
 
