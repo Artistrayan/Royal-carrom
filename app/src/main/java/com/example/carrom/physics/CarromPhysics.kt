@@ -50,13 +50,13 @@ object CarromPhysics {
     )
 
     // Calibrated tournament physics: snappy wooden impacts, natural boric powder glide, authentic velocity transfer
-    private const val RESTITUTION_COIN = 0.90f // Crisp, snappy disc-to-disc elasticity
-    private const val RESTITUTION_RAIL = 0.80f // Solid timber cushion bounce
-    private const val FRICTION_MULT = 0.988f    // Smooth boric powder glide
-    private const val KINETIC_DECEL = 0.12f     // Linear Coulomb sliding friction
-    private const val STOP_THRESHOLD = 0.15f    // Smooth zero-velocity resting threshold
-    private const val ANGULAR_DECAY = 0.980f    // Rotational spin decay on wooden surface
-    private const val TANGENTIAL_FRICTION = 0.10f // Coulomb friction between colliding disc rims
+    private const val RESTITUTION_COIN = 0.78f // Crisp, snappy disc-to-disc elasticity
+    private const val RESTITUTION_RAIL = 0.68f // Solid timber cushion bounce
+    private const val FRICTION_MULT = 0.978f    // Smooth boric powder glide
+    private const val KINETIC_DECEL = 0.18f     // Linear Coulomb sliding friction
+    private const val STOP_THRESHOLD = 0.22f    // Smooth zero-velocity resting threshold
+    private const val ANGULAR_DECAY = 0.94f    // Rotational spin decay on wooden surface
+    private const val TANGENTIAL_FRICTION = 0.075f // Coulomb friction between colliding disc rims
 
     /**
      * Executes one frame of simulation, split into sub-steps for smooth 60fps dynamics
@@ -66,7 +66,7 @@ object CarromPhysics {
         onPocketed: (CarromPiece, Pocket) -> Unit,
         onCollisionSound: (Float) -> Unit,
         onImpactEffect: (Float, Float, Float) -> Unit = { _, _, _ -> },
-        subSteps: Int = 16
+        subSteps: Int = 8
     ): Boolean {
         var anyMoved = false
         val activePieces = pieces.filter { !it.isPocketed }
@@ -75,8 +75,8 @@ object CarromPhysics {
         for (p in activePieces) {
             if (p.isSinking) {
                 anyMoved = true
-                p.pocketScale -= 0.10f
-                p.pocketAlpha -= 0.10f
+                p.pocketScale -= 0.075f
+                p.pocketAlpha -= 0.075f
                 p.rotation += p.angularVelocity * 0.1f * 57.2958f
                 if (p.pocketScale <= 0.05f) {
                     p.isPocketed = true
@@ -139,7 +139,7 @@ object CarromPhysics {
 
                     if (dist < suctionZone) {
                         anyMoved = true
-                        val pullForce = 1.15f * dtFactor
+                        val pullForce = 0.55f * dtFactor
                         p.vx += dx * pullForce
                         p.vy += dy * pullForce
                         // Add vortex spin when sucked towards pocket
@@ -166,32 +166,32 @@ object CarromPhysics {
                 if (p.x - p.radius < RAIL_LEFT && (p.y > 135f && p.y < 865f)) {
                     p.x = RAIL_LEFT + p.radius
                     p.vx = -p.vx * RESTITUTION_RAIL
-                    p.vy *= 0.94f // Cushion friction
-                    p.angularVelocity += p.vy * 0.02f // Induced spin
+                    p.vy *= 0.90f // Cushion friction
+                    p.angularVelocity += p.vy * 0.01f // Induced spin
                     bouncedRail = true
                 }
                 // Right Rail
                 if (p.x + p.radius > RAIL_RIGHT && (p.y > 135f && p.y < 865f)) {
                     p.x = RAIL_RIGHT - p.radius
                     p.vx = -p.vx * RESTITUTION_RAIL
-                    p.vy *= 0.94f
-                    p.angularVelocity -= p.vy * 0.02f
+                    p.vy *= 0.90f
+                    p.angularVelocity -= p.vy * 0.01f
                     bouncedRail = true
                 }
                 // Top Rail
                 if (p.y - p.radius < RAIL_TOP && (p.x > 135f && p.x < 865f)) {
                     p.y = RAIL_TOP + p.radius
                     p.vy = -p.vy * RESTITUTION_RAIL
-                    p.vx *= 0.94f
-                    p.angularVelocity -= p.vx * 0.02f
+                    p.vx *= 0.90f
+                    p.angularVelocity -= p.vx * 0.01f
                     bouncedRail = true
                 }
                 // Bottom Rail
                 if (p.y + p.radius > RAIL_BOTTOM && (p.x > 135f && p.x < 865f)) {
                     p.y = RAIL_BOTTOM - p.radius
                     p.vy = -p.vy * RESTITUTION_RAIL
-                    p.vx *= 0.94f
-                    p.angularVelocity += p.vx * 0.02f
+                    p.vx *= 0.90f
+                    p.angularVelocity += p.vx * 0.01f
                     bouncedRail = true
                 }
 
@@ -264,7 +264,7 @@ object CarromPhysics {
 
                             val contactX = (p1.x + p2.x) / 2f
                             val contactY = (p1.y + p2.y) / 2f
-                            val intensity = kotlin.math.abs(impulseNormal) / 10f
+                            val intensity = (kotlin.math.abs(impulseNormal) / 18f).coerceIn(0f, 1f)
 
                             onCollisionSound(intensity)
                             onImpactEffect(contactX, contactY, intensity)
