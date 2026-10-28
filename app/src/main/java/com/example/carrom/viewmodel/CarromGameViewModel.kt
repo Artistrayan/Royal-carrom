@@ -226,8 +226,8 @@ class CarromGameViewModel : ViewModel() {
                     mode = mode,
                     aiDifficulty = difficulty,
                     currentTurn = TurnPlayer.PLAYER_1,
-                    player1Assigned = if (mode == GameMode.DISC_POOL || mode == GameMode.CLASSIC) PieceType.WHITE else null,
-                    player2Assigned = if (mode == GameMode.DISC_POOL || mode == GameMode.CLASSIC) PieceType.BLACK else null,
+                    player1Assigned = if (mode == GameMode.DISC_POOL || mode == GameMode.CLASSIC || mode == GameMode.VS_AI) PieceType.WHITE else null,
+                    player2Assigned = if (mode == GameMode.DISC_POOL || mode == GameMode.CLASSIC || mode == GameMode.VS_AI) PieceType.BLACK else null,
                     statusMessage = "نوبت شماست! استرایکر را تنظیم و شلیک کنید"
                 )
             )
@@ -509,7 +509,7 @@ class CarromGameViewModel : ViewModel() {
 
         if (!foul && coinsPocketed.isNotEmpty()) {
             when (mode) {
-                GameMode.DISC_POOL, GameMode.CLASSIC -> {
+                GameMode.DISC_POOL, GameMode.CLASSIC, GameMode.VS_AI -> {
                     val assigned = if (currentTurn == TurnPlayer.PLAYER_1) {
                         _uiState.value.matchRuleState.player1Assigned ?: PieceType.WHITE
                     } else {
@@ -582,7 +582,7 @@ class CarromGameViewModel : ViewModel() {
         val remainingQueen = _uiState.value.pieces.count { !it.isPocketed && it.type == PieceType.QUEEN }
 
         var winner: TurnPlayer? = null
-        if (mode == GameMode.DISC_POOL || mode == GameMode.CLASSIC) {
+        if (mode == GameMode.DISC_POOL || mode == GameMode.CLASSIC || mode == GameMode.VS_AI) {
             if (remainingWhite == 0) winner = TurnPlayer.PLAYER_1
             else if (remainingBlack == 0) winner = TurnPlayer.PLAYER_2
         } else if (mode == GameMode.FREESTYLE) {
@@ -630,7 +630,11 @@ class CarromGameViewModel : ViewModel() {
                     y = nextStrikerY,
                     vx = 0f,
                     vy = 0f,
-                    isPocketed = false
+                    isPocketed = false,
+                    isSinking = false,
+                    pocketScale = 1f,
+                    pocketAlpha = 1f,
+                    angularVelocity = 0f
                 )
             } else it
         }
@@ -693,7 +697,8 @@ class CarromGameViewModel : ViewModel() {
                 it.copy(
                     aimAngleRad = decision.aimAngleRad,
                     shotPower = decision.powerFraction,
-                    aimPrediction = prediction
+                    aimPrediction = prediction,
+                    isAiming = true
                 )
             }
 
